@@ -21,49 +21,25 @@ import Result "mo:base/Result";
 import Cycles = "mo:base/ExperimentalCycles";
 
 
-shared(msg) actor class Recycle() = this {
-    type CanisterSettings = {
-        controllers : ?[Principal];
-        compute_allocation : ?Nat;
-        memory_allocation : ?Nat;
-        freezing_threshold : ?Nat;
-    };
-    type CanisterId = {
-        canister_id: Principal;
-    };
-    type InstallMode = {
-        #install;
-        #reinstall;
-        #upgrade;
-    };
-    type InstallCodeParams = {
-        mode: InstallMode;
-        canister_id: Principal;
-        wasm_module: Blob;
-        arg: Blob;
-    };
-    type UpdateSettingsParams = {
-        canister_id: Principal;
-        settings: CanisterSettings;
-    };
-    type Status = {
-        #running;
-        #stopping;
-        #stopped;
-    };
-    type CanisterStatus = {
-        status: Status;
-        settings: CanisterSettings;
-        module_hash: ?Blob;
-        memory_size: Nat;
-        cycles: Nat;
-    };
-    public type ICActor = actor {
-        create_canister: shared(settings: ?CanisterSettings) -> async CanisterId;
-        update_settings: shared(params: UpdateSettingsParams) -> async ();
-        install_code: shared(params: InstallCodeParams) -> async ();
-        canister_status: query(canister_id: CanisterId) -> async CanisterStatus;
-    };
-    let IC: ICActor = actor("aaaaa-aa");
+shared(msg) actor class Recycle(owner_: Principal) = this {
+	
+	private stable var owner: Principal = owner_;
 
+	public shared(msg) func install_code(canister_id: Principal, wasm: Blob): async Bool {
+		assert(msg.caller == owner);
+		//
+	};
+
+	public shared(msg) func get_freezing_threshold(canister_id: Principal): async Nat {
+		return 2_592_000;
+	};
+
+	public shared(msg) func recycle(to: Principal): async Bool {
+		assert(msg.caller == owner);
+		let bal = Cycles.balance();
+		let thresh = await get_freezing_threshold(Principal.fromActor(this));
+		let amount = bal - thresh * 3 / 2;
+		Cycles.add(amount);
+		await dank.mint(to, amount)
+	}
 }

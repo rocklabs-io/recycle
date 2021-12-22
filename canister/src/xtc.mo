@@ -1,5 +1,3 @@
-
-
 module {
 	type Time = int;
 
