@@ -1,0 +1,8 @@
+type Recycle = 
+ service {
+   cycles: () -> (nat) query;
+   get_freezing_threshold: (principal) -> (nat);
+   install_code: (principal, blob) -> (bool);
+   recycle: (principal, nat) -> (bool);
+ };
+service : (principal) -> Recycle
